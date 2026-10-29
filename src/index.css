@@ -1,0 +1,217 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root, [data-palette="cobalt"] {
+    color-scheme: light;
+    /* Cobalt & Copper (KiCad Blue + PCB Copper) */
+    --brand-primary: 37 99 235;         /* #2563eb Blue 600 */
+    --brand-primary-hover: 29 78 216;   /* #1d4ed8 Blue 700 */
+    --brand-primary-subtle: 239 246 255;/* #eff6ff Blue 50 */
+    --brand-primary-border: 191 219 254;/* #bfdbfe Blue 200 */
+    --brand-primary-text: 29 78 216;    /* #1d4ed8 Blue 700 */
+    --brand-accent: 217 119 6;          /* #d97706 Amber/Copper 600 */
+    --brand-accent-text: 180 83 9;      /* #b45309 Amber 700 */
+  }
+  
+  html.dark, html.dark[data-palette="cobalt"] {
+    color-scheme: dark;
+    --brand-primary: 59 130 246;        /* #3b82f6 Blue 500 */
+    --brand-primary-hover: 37 99 235;   /* #2563eb Blue 600 */
+    --brand-primary-subtle: 23 37 84;   /* #172554 Blue 950 */
+    --brand-primary-border: 30 64 175;  /* #1e40af Blue 800 */
+    --brand-primary-text: 147 197 253;  /* #93c5fd Blue 300 */
+    --brand-accent: 245 158 11;         /* #f59e0b Amber 500 */
+    --brand-accent-text: 252 211 77;    /* #fcd34d Amber 300 */
+  }
+
+  [data-palette="amber"] {
+    --brand-primary: 217 119 6;         /* #d97706 Copper Amber 600 */
+    --brand-primary-hover: 180 83 9;    /* #b45309 Amber 700 */
+    --brand-primary-subtle: 254 243 199;/* #fef3c7 Amber 100 */
+    --brand-primary-border: 253 230 138;/* #fde68a Amber 200 */
+    --brand-primary-text: 180 83 9;     /* #b45309 Amber 700 */
+    --brand-accent: 37 99 235;          /* #2563eb Blue 600 */
+    --brand-accent-text: 29 78 216;     /* #1d4ed8 Blue 700 */
+  }
+
+  html.dark[data-palette="amber"] {
+    --brand-primary: 245 158 11;        /* #f59e0b Amber 500 */
+    --brand-primary-hover: 217 119 6;   /* #d97706 Amber 600 */
+    --brand-primary-subtle: 69 26 3;    /* #451a03 Amber 950 */
+    --brand-primary-border: 180 83 9;   /* #b45309 Amber 700 */
+    --brand-primary-text: 252 211 77;   /* #fcd34d Amber 300 */
+    --brand-accent: 59 130 246;         /* #3b82f6 Blue 500 */
+    --brand-accent-text: 147 197 253;   /* #93c5fd Blue 300 */
+  }
+
+  [data-palette="indigo"] {
+    --brand-primary: 79 70 229;         /* #4f46e5 Indigo 600 */
+    --brand-primary-hover: 67 56 202;   /* #4338ca Indigo 700 */
+    --brand-primary-subtle: 238 242 255;/* #eef2ff Indigo 50 */
+    --brand-primary-border: 199 210 254;/* #c7d2fe Indigo 200 */
+    --brand-primary-text: 67 56 202;    /* #4338ca Indigo 700 */
+    --brand-accent: 14 165 233;         /* #0ea5e9 Sky 500 */
+    --brand-accent-text: 2 132 199;     /* #0284c7 Sky 600 */
+  }
+
+  html.dark[data-palette="indigo"] {
+    --brand-primary: 99 102 241;        /* #6366f1 Indigo 500 */
+    --brand-primary-hover: 79 70 229;   /* #4f46e5 Indigo 600 */
+    --brand-primary-subtle: 30 27 75;   /* #1e1b4b Indigo 950 */
+    --brand-primary-border: 67 56 202;  /* #4338ca Indigo 700 */
+    --brand-primary-text: 199 210 254;  /* #c7d2fe Indigo 200 */
+    --brand-accent: 56 189 248;         /* #38bdf8 Sky 400 */
+    --brand-accent-text: 186 230 253;   /* #bae6fd Sky 200 */
+  }
+
+  [data-palette="obsidian"] {
+    --brand-primary: 15 23 42;          /* #0f172a Slate 900 */
+    --brand-primary-hover: 30 41 59;    /* #1e293b Slate 800 */
+    --brand-primary-subtle: 241 245 249;/* #f1f5f9 Slate 100 */
+    --brand-primary-border: 203 213 225;/* #cbd5e1 Slate 300 */
+    --brand-primary-text: 15 23 42;     /* #0f172a Slate 900 */
+    --brand-accent: 37 99 235;          /* #2563eb Blue 600 */
+    --brand-accent-text: 29 78 216;     /* #1d4ed8 Blue 700 */
+  }
+
+  html.dark[data-palette="obsidian"] {
+    --brand-primary: 248 250 252;       /* #f8fafc Slate 50 */
+    --brand-primary-hover: 226 232 240; /* #e2e8f0 Slate 200 */
+    --brand-primary-subtle: 15 23 42;   /* #0f172a Slate 900 */
+    --brand-primary-border: 51 65 85;   /* #334155 Slate 700 */
+    --brand-primary-text: 248 250 252;  /* #f8fafc Slate 50 */
+    --brand-accent: 96 165 250;         /* #60a5fa Blue 400 */
+    --brand-accent-text: 191 219 254;   /* #bfdbfe Blue 200 */
+  }
+
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overflow-x: hidden;
+  }
+
+  /* Custom precision scrollbar */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 9999px;
+  }
+  .dark ::-webkit-scrollbar-thumb {
+    background: #272d3b;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+  }
+  .dark ::-webkit-scrollbar-thumb:hover {
+    background: #3b4255;
+  }
+}
+
+/* ==========================================================
+   AUTHENTIC HARDWARE & PCB ANIMATIONS (HUMAN-CRAFTED)
+   ========================================================== */
+
+/* Active PCB Signal Trace Electron Flow */
+@keyframes electron-pulse {
+  0% {
+    stroke-dashoffset: 48;
+  }
+  100% {
+    stroke-dashoffset: 0;
+  }
+}
+
+.pcb-trace-flow {
+  stroke-dasharray: 6 10;
+  animation: electron-pulse 2s linear infinite;
+}
+
+.pcb-trace-flow-fast {
+  stroke-dasharray: 4 8;
+  animation: electron-pulse 1.2s linear infinite;
+}
+
+/* Subtle 3D Layer Stackup Isometric Perspective */
+.perspective-stackup {
+  perspective: 1200px;
+  transform-style: preserve-3d;
+}
+
+.isometric-layer {
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s ease;
+}
+
+.isometric-layer:hover {
+  transform: translateY(-8px) scale(1.01);
+}
+
+/* Pulsing Circuit Node Glow */
+@keyframes testpoint-ping {
+  0% {
+    transform: scale(0.9);
+    opacity: 0.8;
+  }
+  50% {
+    transform: scale(1.4);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(0.9);
+    opacity: 0;
+  }
+}
+
+.node-ping {
+  animation: testpoint-ping 2.2s cubic-bezier(0.16, 1, 0.3, 1) infinite;
+}
+
+/* Streaming Terminal Cursor */
+@keyframes terminal-blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+.terminal-cursor {
+  display: inline-block;
+  width: 6px;
+  height: 12px;
+  background-color: rgb(var(--brand-accent));
+  animation: terminal-blink 1s infinite;
+  vertical-align: middle;
+  margin-left: 4px;
+}
+
+/* Ambient Card Sheen (Subtle light gliding across top edge) */
+.card-sheen {
+  position: relative;
+  overflow: hidden;
+}
+
+.card-sheen::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgb(var(--brand-primary)), transparent);
+  animation: sheen-travel 6s ease-in-out infinite;
+}
+
+@keyframes sheen-travel {
+  0%, 20% {
+    left: -100%;
+  }
+  50%, 100% {
+    left: 100%;
+  }
+}

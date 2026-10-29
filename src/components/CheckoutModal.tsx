@@ -1,0 +1,305 @@
+import React, { useState } from 'react';
+import { 
+  X, 
+  Check, 
+  AlertCircle, 
+  ArrowRight,
+  Copy,
+  ShieldCheck
+} from 'lucide-react';
+import confetti from 'canvas-confetti';
+import { COURSE_INFO } from '../data/courseData';
+import { RegistrationData } from '../types';
+import { processRazorpayPayment, PaymentResult } from '../services/payment';
+
+interface CheckoutModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+}
+
+export const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose }) => {
+  const [formData, setFormData] = useState<RegistrationData>({
+    name: '',
+    email: '',
+    phone: '',
+    organization: '',
+    experienceLevel: 'Student',
+    paymentMethod: 'razorpay',
+  });
+
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [paymentSuccess, setPaymentSuccess] = useState<PaymentResult | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [copiedTxn, setCopiedTxn] = useState(false);
+
+  if (!isOpen) return null;
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value,
+    });
+    if (errorMessage) setErrorMessage(null);
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!formData.name.trim() || !formData.email.trim() || !formData.phone.trim()) {
+      setErrorMessage('Please fill in your name, email address, and phone number.');
+      return;
+    }
+
+    setIsProcessing(true);
+    setErrorMessage(null);
+
+    try {
+      const result = await processRazorpayPayment(formData);
+      if (result.success) {
+        setPaymentSuccess(result);
+        confetti({
+          particleCount: 80,
+          spread: 60,
+          origin: { y: 0.6 },
+          colors: ['#2563eb', '#3b82f6', '#d97706', '#10b981'],
+        });
+      } else {
+        setErrorMessage(result.error || 'Payment was cancelled or could not be processed.');
+      }
+    } catch (err: any) {
+      setErrorMessage(err.message || 'An error occurred while connecting to Razorpay.');
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  const copyTransactionId = () => {
+    if (paymentSuccess?.transactionId) {
+      navigator.clipboard.writeText(paymentSuccess.transactionId);
+      setCopiedTxn(true);
+      setTimeout(() => setCopiedTxn(false), 2000);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-950/70 backdrop-blur-sm flex items-center justify-center p-4">
+      <div className="relative w-full max-w-lg rounded-2xl bg-white dark:bg-[#0c0f17] border border-slate-200 dark:border-slate-800 shadow-2xl overflow-hidden my-8">
+        
+        {/* Header */}
+        <div className="flex items-center justify-between p-5 border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50">
+          <div>
+            <h3 className="text-sm font-bold text-slate-900 dark:text-white">
+              {COURSE_INFO.company}
+            </h3>
+            <p className="text-xs text-slate-500 dark:text-slate-400">Masterclass Enrolment Pass</p>
+          </div>
+          <button
+            onClick={onClose}
+            className="w-8 h-8 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white flex items-center justify-center transition-colors"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+
+        {/* Modal Body */}
+        <div className="p-6">
+          {paymentSuccess ? (
+            /* Confirmed Enrolment View */
+            <div className="text-center py-2">
+              <div className="w-12 h-12 rounded-full bg-emerald-100 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mx-auto mb-3">
+                <Check className="w-6 h-6" />
+              </div>
+
+              <span className="text-[11px] font-mono uppercase px-2.5 py-0.5 rounded bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800 font-bold">
+                Enrolment Confirmed
+              </span>
+
+              <h3 className="text-xl font-bold text-slate-900 dark:text-white mt-3 mb-1">
+                You're Enrolled in the Masterclass
+              </h3>
+              <p className="text-xs text-slate-600 dark:text-slate-400 max-w-sm mx-auto mb-6">
+                Thank you, <strong className="text-slate-900 dark:text-white font-semibold">{formData.name}</strong>. Your seat for the 6-Day KiCad & ChatGPT Astra masterclass is confirmed.
+              </p>
+
+              <div className="bg-slate-50 dark:bg-slate-900 p-4 rounded-xl border border-slate-200 dark:border-slate-800 text-left font-mono text-xs space-y-2 mb-6">
+                <div className="flex justify-between border-b border-slate-200 dark:border-slate-800 pb-2">
+                  <span className="text-slate-500">Masterclass:</span>
+                  <span className="text-slate-900 dark:text-slate-200 font-semibold">KiCad + ChatGPT Astra</span>
+                </div>
+                <div className="flex justify-between border-b border-slate-200 dark:border-slate-800 pb-2">
+                  <span className="text-slate-500">Live Dates:</span>
+                  <span className="text-slate-900 dark:text-slate-200">{COURSE_INFO.dates} • {COURSE_INFO.time}</span>
+                </div>
+                <div className="flex justify-between border-b border-slate-200 dark:border-slate-800 pb-2">
+                  <span className="text-slate-500">Amount Paid:</span>
+                  <span className="text-brand-primaryText font-bold">₹{COURSE_INFO.price}</span>
+                </div>
+                <div className="flex justify-between items-center pt-1">
+                  <span className="text-slate-500">Payment ID:</span>
+                  <button
+                    onClick={copyTransactionId}
+                    className="flex items-center gap-1.5 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white bg-slate-200/60 dark:bg-slate-800 px-2 py-0.5 rounded border border-slate-300 dark:border-slate-700"
+                  >
+                    <span>{paymentSuccess.transactionId}</span>
+                    {copiedTxn ? <Check className="w-3 h-3 text-emerald-600" /> : <Copy className="w-3 h-3" />}
+                  </button>
+                </div>
+              </div>
+
+              <p className="text-xs text-slate-500 mb-6">
+                A calendar invitation and streaming instructions have been dispatched to <span className="text-slate-900 dark:text-white font-semibold">{formData.email}</span>.
+              </p>
+
+              <button
+                onClick={onClose}
+                className="w-full py-2.5 rounded-lg bg-brand-primary hover:bg-brand-primaryHover text-white font-medium text-xs transition-colors shadow-xs"
+              >
+                Close Window
+              </button>
+            </div>
+          ) : (
+            /* Checkout Form */
+            <form onSubmit={handleSubmit} className="space-y-4">
+              {errorMessage && (
+                <div className="p-3 rounded-lg bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 text-xs flex items-center gap-2">
+                  <AlertCircle className="w-4 h-4 shrink-0 text-red-500" />
+                  <span>{errorMessage}</span>
+                </div>
+              )}
+
+              {/* Order summary header */}
+              <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex items-center justify-between">
+                <div>
+                  <h4 className="text-xs font-bold text-slate-900 dark:text-white">6-Day KiCad & ChatGPT Astra Pass</h4>
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400">Live Sessions + Full HD Recordings + Certificate</p>
+                </div>
+                <div className="text-right">
+                  <span className="text-xs text-slate-400 line-through mr-1.5">₹2,499</span>
+                  <span className="text-base font-bold text-brand-primaryText">₹{COURSE_INFO.price}</span>
+                </div>
+              </div>
+
+              {/* Form fields */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                    Full Name *
+                  </label>
+                  <input
+                    type="text"
+                    name="name"
+                    required
+                    value={formData.name}
+                    onChange={handleInputChange}
+                    placeholder="Rahul Sharma"
+                    className="w-full px-3 py-2 rounded-lg bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white placeholder-slate-400 text-xs focus:border-brand-primary focus:outline-none transition-colors"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                    Email Address *
+                  </label>
+                  <input
+                    type="email"
+                    name="email"
+                    required
+                    value={formData.email}
+                    onChange={handleInputChange}
+                    placeholder="rahul@example.com"
+                    className="w-full px-3 py-2 rounded-lg bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white placeholder-slate-400 text-xs focus:border-brand-primary focus:outline-none transition-colors"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                    WhatsApp / Phone *
+                  </label>
+                  <input
+                    type="tel"
+                    name="phone"
+                    required
+                    value={formData.phone}
+                    onChange={handleInputChange}
+                    placeholder="+91 98765 43210"
+                    className="w-full px-3 py-2 rounded-lg bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white placeholder-slate-400 text-xs focus:border-brand-primary focus:outline-none transition-colors"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                    College / Organization
+                  </label>
+                  <input
+                    type="text"
+                    name="organization"
+                    value={formData.organization}
+                    onChange={handleInputChange}
+                    placeholder="e.g. NIT / Tech Corp"
+                    className="w-full px-3 py-2 rounded-lg bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white placeholder-slate-400 text-xs focus:border-brand-primary focus:outline-none transition-colors"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                  Experience Level
+                </label>
+                <select
+                  name="experienceLevel"
+                  value={formData.experienceLevel}
+                  onChange={handleInputChange}
+                  className="w-full px-3 py-2 rounded-lg bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white text-xs focus:border-brand-primary focus:outline-none transition-colors"
+                >
+                  <option value="Student">ECE / EEE / Engineering Student</option>
+                  <option value="Fresher">Recent Graduate / Fresher</option>
+                  <option value="Professional">Working Hardware / Embedded Engineer</option>
+                  <option value="Hobbyist">Arduino / ESP32 Electronics Maker</option>
+                </select>
+              </div>
+
+              {/* Razorpay Gateway Badge */}
+              <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs">
+                <div className="flex items-center justify-between mb-1">
+                  <span className="font-semibold text-slate-900 dark:text-white flex items-center gap-1.5">
+                    <ShieldCheck className="w-4 h-4 text-brand-primaryText" />
+                    Secure Checkout via Razorpay
+                  </span>
+                  <span className="text-[10px] font-mono text-slate-500">
+                    256-bit Encrypted
+                  </span>
+                </div>
+                <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                  Supports UPI (Google Pay, PhonePe, Paytm), Debit/Credit Cards, and NetBanking.
+                </p>
+              </div>
+
+              {/* Submit CTA */}
+              <div className="pt-2">
+                <button
+                  type="submit"
+                  disabled={isProcessing}
+                  className="w-full py-3.5 rounded-xl bg-brand-primary hover:bg-brand-primaryHover text-white font-semibold text-sm transition-colors flex items-center justify-center gap-2 disabled:opacity-50 shadow-xs"
+                >
+                  {isProcessing ? (
+                    <span className="flex items-center gap-2">
+                      <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                      <span>Connecting to Razorpay...</span>
+                    </span>
+                  ) : (
+                    <span className="flex items-center gap-1.5">
+                      <span>Proceed to Pay ₹{COURSE_INFO.price}</span>
+                      <ArrowRight className="w-4 h-4" />
+                    </span>
+                  )}
+                </button>
+              </div>
+            </form>
+          )}
+        </div>
+
+      </div>
+    </div>
+  );
+};
