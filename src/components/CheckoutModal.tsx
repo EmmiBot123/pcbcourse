@@ -145,15 +145,39 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose })
                 </div>
               </div>
 
-              <p className="text-xs text-slate-500 mb-6">
-                A calendar invitation and streaming instructions have been dispatched to <span className="text-slate-900 dark:text-white font-semibold">{formData.email}</span>.
-              </p>
+              <div className="p-3.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-xs text-left mb-6 font-mono text-emerald-800 dark:text-emerald-300 flex items-start gap-2.5">
+                <Check className="w-4 h-4 shrink-0 text-emerald-600 dark:text-emerald-400 mt-0.5" />
+                <span className="leading-relaxed">
+                  Welcome packet, Zoom/Meet streaming link & Google Calendar invite have been dispatched to <strong className="text-slate-900 dark:text-white underline">{formData.email}</strong>.
+                </span>
+              </div>
+
+              {/* Post-Payment Action Hub */}
+              <div className="space-y-2.5 mb-6">
+                <a
+                  href="https://chat.whatsapp.com/invite-placeholder"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full py-3 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs transition-colors flex items-center justify-center gap-2 shadow-sm"
+                >
+                  <span>💬 Join Batch WhatsApp Community</span>
+                </a>
+
+                <a
+                  href="https://calendar.google.com/calendar/render?action=TEMPLATE&text=ChatGPT+Astra+%2B+AI+Co-pilot+in+KiCad+Masterclass&dates=20261101T113000Z/20261101T130000Z&recur=RRULE:FREQ=DAILY;COUNT=6&details=Live+6-Day+Hardware+Masterclass+by+AronLabz+Tech+Pvt+Ltd.+Daily+at+5:00+PM+IST.&location=Online+Live+Stream"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full py-2.5 px-4 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 font-medium text-xs transition-colors flex items-center justify-center gap-2 border border-slate-200 dark:border-slate-700"
+                >
+                  <span>📅 Add Nov 1st–6th to Google Calendar</span>
+                </a>
+              </div>
 
               <button
                 onClick={onClose}
-                className="w-full py-2.5 rounded-lg bg-brand-primary hover:bg-brand-primaryHover text-white font-medium text-xs transition-colors shadow-xs"
+                className="w-full py-2.5 rounded-lg text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 font-medium text-xs transition-colors"
               >
-                Close Window
+                Done
               </button>
             </div>
           ) : (
