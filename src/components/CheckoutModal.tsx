@@ -5,7 +5,10 @@ import {
   AlertCircle, 
   ArrowRight,
   Copy,
-  ShieldCheck
+  ShieldCheck,
+  Mail,
+  RefreshCw,
+  Loader2
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { COURSE_INFO } from '../data/courseData';
@@ -32,6 +35,8 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose })
   const [paymentSuccess, setPaymentSuccess] = useState<PaymentResult | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [copiedTxn, setCopiedTxn] = useState(false);
+  const [emailStatus, setEmailStatus] = useState<'idle' | 'sending' | 'sent' | 'failed'>('idle');
+  const [emailError, setEmailError] = useState<string | null>(null);
 
   if (!isOpen) return null;
 
@@ -41,6 +46,23 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose })
       [e.target.name]: e.target.value,
     });
     if (errorMessage) setErrorMessage(null);
+  };
+
+  const dispatchEmail = async (result: PaymentResult) => {
+    setEmailStatus('sending');
+    setEmailError(null);
+    try {
+      const res = await sendStudentConfirmationEmail(formData, result);
+      if (res.success) {
+        setEmailStatus('sent');
+      } else {
+        setEmailStatus('failed');
+        setEmailError(res.message || 'Dispatch failed');
+      }
+    } catch (err: any) {
+      setEmailStatus('failed');
+      setEmailError(err.message || 'Network error');
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -58,10 +80,8 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose })
       if (result.success) {
         setPaymentSuccess(result);
         
-        // Automated EmailJS student confirmation dispatch
-        sendStudentConfirmationEmail(formData, result).catch((err) => {
-          console.warn('[EmailJS] Async notification error:', err);
-        });
+        // Automated EmailJS student confirmation dispatch with reactive status
+        dispatchEmail(result);
 
         confetti({
           particleCount: 80,
@@ -152,12 +172,60 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose })
                 </div>
               </div>
 
-              <div className="p-3 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-xs text-left mb-4 font-mono text-emerald-800 dark:text-emerald-300 flex items-start gap-2">
-                <Check className="w-3.5 h-3.5 shrink-0 text-emerald-600 dark:text-emerald-400 mt-0.5" />
-                <span className="leading-relaxed">
-                  Welcome packet & streaming link dispatched to <strong className="text-slate-900 dark:text-white underline">{formData.email}</strong>.
-                </span>
-              </div>
+              {/* Email Status & Delivery Assurance */}
+              {emailStatus === 'sending' && (
+                <div className="p-3 rounded-xl bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800 text-xs text-left mb-4 font-mono text-blue-800 dark:text-blue-300 flex items-center gap-2">
+                  <Loader2 className="w-3.5 h-3.5 shrink-0 text-blue-600 dark:text-blue-400 animate-spin" />
+                  <span className="leading-relaxed">
+                    Dispatching confirmation email to <strong className="text-slate-900 dark:text-white underline">{formData.email}</strong>...
+                  </span>
+                </div>
+              )}
+
+              {emailStatus === 'sent' && (
+                <div className="p-3 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-xs text-left mb-4 font-mono text-emerald-800 dark:text-emerald-300 flex items-start justify-between gap-2">
+                  <div className="flex items-start gap-2">
+                    <Check className="w-3.5 h-3.5 shrink-0 text-emerald-600 dark:text-emerald-400 mt-0.5" />
+                    <span className="leading-relaxed">
+                      Official confirmation email sent to <strong className="text-slate-900 dark:text-white underline">{formData.email}</strong>. (Check Inbox & Spam/Promotions).
+                    </span>
+                  </div>
+                  <button
+                    onClick={() => dispatchEmail(paymentSuccess)}
+                    title="Resend confirmation email"
+                    className="shrink-0 p-1 rounded hover:bg-emerald-200/50 dark:hover:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300 transition-colors"
+                  >
+                    <RefreshCw className="w-3 h-3" />
+                  </button>
+                </div>
+              )}
+
+              {emailStatus === 'failed' && (
+                <div className="p-3 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 text-xs text-left mb-4 font-mono text-amber-800 dark:text-amber-300">
+                  <div className="flex items-start gap-2 mb-2">
+                    <AlertCircle className="w-3.5 h-3.5 shrink-0 text-amber-600 dark:text-amber-400 mt-0.5" />
+                    <span className="leading-relaxed">
+                      Email dispatch notice: {emailError || 'Could not auto-deliver'}.
+                    </span>
+                  </div>
+                  <button
+                    onClick={() => dispatchEmail(paymentSuccess)}
+                    className="w-full py-1.5 px-3 rounded-lg bg-amber-600 hover:bg-amber-500 text-white font-semibold text-[11px] transition-colors flex items-center justify-center gap-1.5"
+                  >
+                    <Mail className="w-3 h-3" />
+                    <span>Retry Sending Confirmation Email</span>
+                  </button>
+                </div>
+              )}
+
+              {emailStatus === 'idle' && (
+                <div className="p-3 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-xs text-left mb-4 font-mono text-emerald-800 dark:text-emerald-300 flex items-start gap-2">
+                  <Check className="w-3.5 h-3.5 shrink-0 text-emerald-600 dark:text-emerald-400 mt-0.5" />
+                  <span className="leading-relaxed">
+                    Confirmation packet & streaming access queued for <strong className="text-slate-900 dark:text-white underline">{formData.email}</strong>.
+                  </span>
+                </div>
+              )}
 
               {/* Post-Payment Action Hub */}
               <div className="space-y-2 mb-3">

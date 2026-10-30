@@ -40,6 +40,12 @@ export async function sendStudentConfirmationEmail(
     };
   }
 
+  const orderId = payment.transactionId || payment.orderId || `ord_${Date.now()}`;
+  const courseDates = 'November 1st – November 6th, 2026';
+  const courseTime = '5:00 PM – 6:30 PM IST Daily';
+  const whatsappUrl = 'https://chat.whatsapp.com/invite-placeholder';
+  const calendarUrl = 'https://calendar.google.com/calendar/render?action=TEMPLATE&text=ChatGPT+Astra+%2B+AI+Co-pilot+in+KiCad+Masterclass&dates=20261101T113000Z/20261101T130000Z&recur=RRULE:FREQ=DAILY;COUNT=6&details=Live+6-Day+Hardware+Masterclass+by+AronLabz+Tech+Pvt+Ltd.+Daily+at+5:00+PM+IST.&location=Online+Live+Stream';
+
   const payload = {
     service_id: config.serviceId,
     template_id: config.templateId,
@@ -50,27 +56,43 @@ export async function sendStudentConfirmationEmail(
       to_email: data.email,
       name: data.name,
       to_name: data.name,
+      phone: data.phone,
       student_phone: data.phone,
       student_org: data.organization || 'Independent Engineer',
+      organization: data.organization || 'Independent Engineer',
       
       // Order & Course details
-      order_id: payment.transactionId || payment.orderId || `order_${Date.now()}`,
-      payment_id: payment.transactionId || 'pay_demo',
+      order_id: orderId,
+      payment_id: payment.transactionId || orderId,
       course_title: 'ChatGPT Astra + AI Co-pilot in KiCad Masterclass',
-      course_dates: 'November 1st – November 6th, 2026',
-      course_time: '5:00 PM – 6:30 PM IST Daily',
-      amount_paid: '₹399',
+      course_dates: courseDates,
+      course_time: courseTime,
+      amount_paid: '₹399.00',
       price: '399',
       units: '1',
-      item: 'ChatGPT Astra + AI Co-pilot in KiCad Masterclass',
-      cost: { shipping: '0.00', tax: '0.00' },
+      item: 'ChatGPT Astra + AI Co-pilot in KiCad Masterclass (6 Live Sessions)',
+      
+      // Legacy order template compatibility (so existing templates never crash)
+      cost: {
+        shipping: '0.00',
+        tax: '0.00',
+        total: '399.00',
+      },
       orders: [
         {
-          name: 'ChatGPT Astra + AI Co-pilot in KiCad Masterclass Pass',
+          name: 'ChatGPT Astra + AI Co-pilot in KiCad Masterclass (6 Live Sessions)',
           price: '399',
-          units: '1'
-        }
+          units: '1',
+          image_url: 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=120&auto=format&fit=crop&q=80',
+        },
       ],
+
+      // Action links
+      whatsapp_link: whatsappUrl,
+      calendar_link: calendarUrl,
+      course_url: 'https://emmibot123.github.io/pcbcourse/',
+
+      // Company info
       company_name: 'AronLabz Tech Pvt Ltd',
       company_email: 'support@aronlabz.com',
     },
@@ -95,7 +117,6 @@ export async function sendStudentConfirmationEmail(
     }
   } catch (err: any) {
     console.error('[EmailJS] Network error during dispatch:', err);
-    return { success: false, message: err.message };
+    return { success: false, message: err.message || 'Network request failed' };
   }
 }
-
