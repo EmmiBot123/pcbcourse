@@ -11,6 +11,7 @@ import confetti from 'canvas-confetti';
 import { COURSE_INFO } from '../data/courseData';
 import { RegistrationData } from '../types';
 import { processRazorpayPayment, PaymentResult } from '../services/payment';
+import { sendStudentConfirmationEmail } from '../services/emailService';
 
 interface CheckoutModalProps {
   isOpen: boolean;
@@ -56,6 +57,12 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose })
       const result = await processRazorpayPayment(formData);
       if (result.success) {
         setPaymentSuccess(result);
+        
+        // Automated EmailJS student confirmation dispatch
+        sendStudentConfirmationEmail(formData, result).catch((err) => {
+          console.warn('[EmailJS] Async notification error:', err);
+        });
+
         confetti({
           particleCount: 80,
           spread: 60,
