@@ -13,7 +13,7 @@ export interface RazorpayConfig {
 }
 
 export const defaultRazorpayConfig: RazorpayConfig = {
-  keyId: import.meta.env.VITE_RAZORPAY_KEY_ID || 'rzp_test_Tu1mspEp8uQLFq',
+  keyId: import.meta.env.VITE_RAZORPAY_KEY_ID || 'rzp_live_IZXWslmHsQEjWA',
   currency: 'INR',
   amount: 399,
 };
