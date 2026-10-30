@@ -81,59 +81,59 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose })
   };
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-950/70 backdrop-blur-sm flex items-center justify-center p-4">
-      <div className="relative w-full max-w-lg rounded-2xl bg-white dark:bg-[#0c0f17] border border-slate-200 dark:border-slate-800 shadow-2xl overflow-hidden my-8">
+    <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-950/75 backdrop-blur-sm flex justify-center items-start sm:items-center p-3 sm:p-4">
+      <div className="relative w-full max-w-lg max-h-[94vh] flex flex-col rounded-2xl bg-white dark:bg-[#0c0f17] border border-slate-200 dark:border-slate-800 shadow-2xl overflow-hidden my-auto animate-in fade-in zoom-in-95 duration-150">
         
-        {/* Header */}
-        <div className="flex items-center justify-between p-5 border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50">
+        {/* Header (Always pinned & visible) */}
+        <div className="flex items-center justify-between px-5 py-3.5 border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50 shrink-0">
           <div>
             <h3 className="text-sm font-bold text-slate-900 dark:text-white">
               {COURSE_INFO.company}
             </h3>
-            <p className="text-xs text-slate-500 dark:text-slate-400">Masterclass Enrolment Pass</p>
+            <p className="text-[11px] text-slate-500 dark:text-slate-400">Masterclass Enrolment Pass</p>
           </div>
           <button
             onClick={onClose}
-            className="w-8 h-8 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white flex items-center justify-center transition-colors"
+            className="w-7 h-7 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white flex items-center justify-center transition-colors"
           >
             <X className="w-4 h-4" />
           </button>
         </div>
 
-        {/* Modal Body */}
-        <div className="p-6">
+        {/* Modal Body (Scrollable with elegant padding) */}
+        <div className="p-5 sm:p-6 overflow-y-auto flex-1">
           {paymentSuccess ? (
             /* Confirmed Enrolment View */
-            <div className="text-center py-2">
-              <div className="w-12 h-12 rounded-full bg-emerald-100 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mx-auto mb-3">
-                <Check className="w-6 h-6" />
+            <div className="text-center py-1">
+              <div className="w-11 h-11 rounded-full bg-emerald-100 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mx-auto mb-2.5">
+                <Check className="w-5 h-5" />
               </div>
 
-              <span className="text-[11px] font-mono uppercase px-2.5 py-0.5 rounded bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800 font-bold">
+              <span className="text-[10px] font-mono uppercase px-2 py-0.5 rounded bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800 font-bold">
                 Enrolment Confirmed
               </span>
 
-              <h3 className="text-xl font-bold text-slate-900 dark:text-white mt-3 mb-1">
+              <h3 className="text-lg font-bold text-slate-900 dark:text-white mt-2 mb-1">
                 You're Enrolled in the Masterclass
               </h3>
-              <p className="text-xs text-slate-600 dark:text-slate-400 max-w-sm mx-auto mb-6">
+              <p className="text-xs text-slate-600 dark:text-slate-400 max-w-sm mx-auto mb-4">
                 Thank you, <strong className="text-slate-900 dark:text-white font-semibold">{formData.name}</strong>. Your seat for the 6-Day KiCad & ChatGPT Astra masterclass is confirmed.
               </p>
 
-              <div className="bg-slate-50 dark:bg-slate-900 p-4 rounded-xl border border-slate-200 dark:border-slate-800 text-left font-mono text-xs space-y-2 mb-6">
-                <div className="flex justify-between border-b border-slate-200 dark:border-slate-800 pb-2">
+              <div className="bg-slate-50 dark:bg-slate-900 p-3.5 rounded-xl border border-slate-200 dark:border-slate-800 text-left font-mono text-xs space-y-1.5 mb-4">
+                <div className="flex justify-between border-b border-slate-200 dark:border-slate-800 pb-1.5">
                   <span className="text-slate-500">Masterclass:</span>
                   <span className="text-slate-900 dark:text-slate-200 font-semibold">KiCad + ChatGPT Astra</span>
                 </div>
-                <div className="flex justify-between border-b border-slate-200 dark:border-slate-800 pb-2">
+                <div className="flex justify-between border-b border-slate-200 dark:border-slate-800 pb-1.5">
                   <span className="text-slate-500">Live Dates:</span>
                   <span className="text-slate-900 dark:text-slate-200">{COURSE_INFO.dates} • {COURSE_INFO.time}</span>
                 </div>
-                <div className="flex justify-between border-b border-slate-200 dark:border-slate-800 pb-2">
+                <div className="flex justify-between border-b border-slate-200 dark:border-slate-800 pb-1.5">
                   <span className="text-slate-500">Amount Paid:</span>
                   <span className="text-brand-primaryText font-bold">₹{COURSE_INFO.price}</span>
                 </div>
-                <div className="flex justify-between items-center pt-1">
+                <div className="flex justify-between items-center pt-0.5">
                   <span className="text-slate-500">Payment ID:</span>
                   <button
                     onClick={copyTransactionId}
@@ -145,20 +145,20 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose })
                 </div>
               </div>
 
-              <div className="p-3.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-xs text-left mb-6 font-mono text-emerald-800 dark:text-emerald-300 flex items-start gap-2.5">
-                <Check className="w-4 h-4 shrink-0 text-emerald-600 dark:text-emerald-400 mt-0.5" />
+              <div className="p-3 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-xs text-left mb-4 font-mono text-emerald-800 dark:text-emerald-300 flex items-start gap-2">
+                <Check className="w-3.5 h-3.5 shrink-0 text-emerald-600 dark:text-emerald-400 mt-0.5" />
                 <span className="leading-relaxed">
-                  Welcome packet, Zoom/Meet streaming link & Google Calendar invite have been dispatched to <strong className="text-slate-900 dark:text-white underline">{formData.email}</strong>.
+                  Welcome packet & streaming link dispatched to <strong className="text-slate-900 dark:text-white underline">{formData.email}</strong>.
                 </span>
               </div>
 
               {/* Post-Payment Action Hub */}
-              <div className="space-y-2.5 mb-6">
+              <div className="space-y-2 mb-3">
                 <a
                   href="https://chat.whatsapp.com/invite-placeholder"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-full py-3 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs transition-colors flex items-center justify-center gap-2 shadow-sm"
+                  className="w-full py-2.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs transition-colors flex items-center justify-center gap-2 shadow-xs"
                 >
                   <span>💬 Join Batch WhatsApp Community</span>
                 </a>
@@ -167,7 +167,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose })
                   href="https://calendar.google.com/calendar/render?action=TEMPLATE&text=ChatGPT+Astra+%2B+AI+Co-pilot+in+KiCad+Masterclass&dates=20261101T113000Z/20261101T130000Z&recur=RRULE:FREQ=DAILY;COUNT=6&details=Live+6-Day+Hardware+Masterclass+by+AronLabz+Tech+Pvt+Ltd.+Daily+at+5:00+PM+IST.&location=Online+Live+Stream"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-full py-2.5 px-4 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 font-medium text-xs transition-colors flex items-center justify-center gap-2 border border-slate-200 dark:border-slate-700"
+                  className="w-full py-2 px-4 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 font-medium text-xs transition-colors flex items-center justify-center gap-2 border border-slate-200 dark:border-slate-700"
                 >
                   <span>📅 Add Nov 1st–6th to Google Calendar</span>
                 </a>
@@ -175,7 +175,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose })
 
               <button
                 onClick={onClose}
-                className="w-full py-2.5 rounded-lg text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 font-medium text-xs transition-colors"
+                className="w-full py-2 rounded-lg text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 font-medium text-xs transition-colors"
               >
                 Done
               </button>
