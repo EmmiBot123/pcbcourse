@@ -30,6 +30,7 @@ export interface EmailSendResult {
 export async function sendStudentConfirmationEmail(
   data: RegistrationData,
   payment: PaymentResult,
+  amount: number = 399,
   config: EmailJSConfig = defaultEmailJSConfig
 ): Promise<EmailSendResult> {
   if (!config.serviceId || !config.templateId || !config.publicKey) {
@@ -67,8 +68,8 @@ export async function sendStudentConfirmationEmail(
       course_title: 'ChatGPT Astra + AI Co-pilot in KiCad Masterclass',
       course_dates: courseDates,
       course_time: courseTime,
-      amount_paid: '₹399.00',
-      price: '399',
+      amount_paid: `₹${amount}.00`,
+      price: `${amount}`,
       units: '1',
       item: 'ChatGPT Astra + AI Co-pilot in KiCad Masterclass (6 Live Sessions)',
       
@@ -76,12 +77,12 @@ export async function sendStudentConfirmationEmail(
       cost: {
         shipping: '0.00',
         tax: '0.00',
-        total: '399.00',
+        total: `${amount}.00`,
       },
       orders: [
         {
           name: 'ChatGPT Astra + AI Co-pilot in KiCad Masterclass (6 Live Sessions)',
-          price: '399',
+          price: `${amount}`,
           units: '1',
           image_url: 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=120&auto=format&fit=crop&q=80',
         },

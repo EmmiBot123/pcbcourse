@@ -8,12 +8,13 @@ import {
   ShieldCheck,
   Mail,
   RefreshCw,
-  Loader2
+  Loader2,
+  Tag
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { COURSE_INFO } from '../data/courseData';
 import { RegistrationData } from '../types';
-import { processRazorpayPayment, PaymentResult } from '../services/payment';
+import { processRazorpayPayment, PaymentResult, defaultRazorpayConfig } from '../services/payment';
 import { sendStudentConfirmationEmail } from '../services/emailService';
 
 interface CheckoutModalProps {
@@ -38,6 +39,48 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose })
   const [emailStatus, setEmailStatus] = useState<'idle' | 'sending' | 'sent' | 'failed'>('idle');
   const [emailError, setEmailError] = useState<string | null>(null);
 
+  // Promo Code States
+  const [promoInput, setPromoInput] = useState('');
+  const [appliedPromo, setAppliedPromo] = useState<string | null>(null);
+  const [promoMessage, setPromoMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const [paidAmount, setPaidAmount] = useState<number>(COURSE_INFO.price);
+
+  const originalPrice = COURSE_INFO.price; // ₹399
+  const currentPrice = appliedPromo ? 1 : originalPrice; // ₹1 if promo applied
+  const discountAmount = originalPrice - currentPrice;
+
+  // Accepted promo codes (e.g. ARON1, TEST1, ASTRA1, VIP1, etc. or anything ending with 1)
+  const validPromoCodes = ['ARON1', 'TEST1', 'ASTRA1', 'VIP1', 'PCB1', 'KICAD1', '1RS', 'PROMO1', 'ONE'];
+
+  const handleApplyPromo = (e: React.MouseEvent) => {
+    e.preventDefault();
+    const cleanCode = promoInput.trim().toUpperCase();
+    if (!cleanCode) {
+      setPromoMessage({ type: 'error', text: 'Please enter a promo code.' });
+      return;
+    }
+
+    if (validPromoCodes.includes(cleanCode) || cleanCode.endsWith('1') || cleanCode === 'ARON' || cleanCode === 'TEST') {
+      setAppliedPromo(cleanCode);
+      setPromoMessage({ type: 'success', text: `Promo code "${cleanCode}" applied! Payable amount is now ₹1.` });
+      confetti({
+        particleCount: 50,
+        spread: 50,
+        origin: { y: 0.65 },
+        colors: ['#10b981', '#2563eb', '#d97706'],
+      });
+    } else {
+      setPromoMessage({ type: 'error', text: 'Invalid code. Try ARON1 or TEST1.' });
+    }
+  };
+
+  const handleRemovePromo = (e: React.MouseEvent) => {
+    e.preventDefault();
+    setAppliedPromo(null);
+    setPromoInput('');
+    setPromoMessage(null);
+  };
+
   if (!isOpen) return null;
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -48,11 +91,11 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose })
     if (errorMessage) setErrorMessage(null);
   };
 
-  const dispatchEmail = async (result: PaymentResult) => {
+  const dispatchEmail = async (result: PaymentResult, amount: number = currentPrice) => {
     setEmailStatus('sending');
     setEmailError(null);
     try {
-      const res = await sendStudentConfirmationEmail(formData, result);
+      const res = await sendStudentConfirmationEmail(formData, result, amount);
       if (res.success) {
         setEmailStatus('sent');
       } else {
@@ -76,12 +119,19 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose })
     setErrorMessage(null);
 
     try {
-      const result = await processRazorpayPayment(formData);
+      // Pass the effective amount (₹1 if promo code applied, else ₹399)
+      const effectiveAmount = currentPrice;
+      const result = await processRazorpayPayment(formData, {
+        ...defaultRazorpayConfig,
+        amount: effectiveAmount,
+      });
+
       if (result.success) {
         setPaymentSuccess(result);
+        setPaidAmount(effectiveAmount);
         
         // Automated EmailJS student confirmation dispatch with reactive status
-        dispatchEmail(result);
+        dispatchEmail(result, effectiveAmount);
 
         confetti({
           particleCount: 80,
@@ -158,7 +208,9 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose })
                 </div>
                 <div className="flex justify-between border-b border-slate-200 dark:border-slate-800 pb-1.5">
                   <span className="text-slate-500">Amount Paid:</span>
-                  <span className="text-brand-primaryText font-bold">₹{COURSE_INFO.price}</span>
+                  <span className="text-brand-primaryText font-bold">
+                    ₹{paidAmount} {appliedPromo && <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-normal">({appliedPromo} applied)</span>}
+                  </span>
                 </div>
                 <div className="flex justify-between items-center pt-0.5">
                   <span className="text-slate-500">Payment ID:</span>
@@ -273,8 +325,76 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose })
                 </div>
                 <div className="text-right">
                   <span className="text-xs text-slate-400 line-through mr-1.5">₹2,499</span>
-                  <span className="text-base font-bold text-brand-primaryText">₹{COURSE_INFO.price}</span>
+                  {appliedPromo ? (
+                    <span className="inline-flex items-center gap-1.5">
+                      <span className="text-xs text-slate-400 line-through">₹{originalPrice}</span>
+                      <span className="text-base font-bold text-emerald-600 dark:text-emerald-400">₹{currentPrice}</span>
+                    </span>
+                  ) : (
+                    <span className="text-base font-bold text-brand-primaryText">₹{originalPrice}</span>
+                  )}
                 </div>
+              </div>
+
+              {/* Promo Code Box */}
+              <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+                    <Tag className="w-3.5 h-3.5 text-brand-primaryText" />
+                    Promo / Coupon Code
+                  </span>
+                  {appliedPromo ? (
+                    <span className="text-[10px] font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-100 dark:bg-emerald-950/60 px-2 py-0.5 rounded border border-emerald-200 dark:border-emerald-800">
+                      ₹{discountAmount} SAVED
+                    </span>
+                  ) : (
+                    <span className="text-[10px] text-slate-400">
+                      Try code: <code className="text-brand-primaryText font-bold bg-blue-50 dark:bg-blue-950/50 px-1 py-0.5 rounded">ARON1</code> or <code className="text-brand-primaryText font-bold bg-blue-50 dark:bg-blue-950/50 px-1 py-0.5 rounded">TEST1</code>
+                    </span>
+                  )}
+                </div>
+
+                {!appliedPromo ? (
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={promoInput}
+                      onChange={(e) => {
+                        setPromoInput(e.target.value);
+                        if (promoMessage) setPromoMessage(null);
+                      }}
+                      placeholder="Enter promo code (e.g. ARON1)"
+                      className="flex-1 px-3 py-1.5 font-mono uppercase tracking-wider rounded-lg bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white placeholder-slate-400 text-xs focus:border-brand-primary focus:outline-none"
+                    />
+                    <button
+                      type="button"
+                      onClick={handleApplyPromo}
+                      className="px-3.5 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 dark:bg-blue-600 dark:hover:bg-blue-500 text-white font-semibold text-xs transition-colors shadow-xs"
+                    >
+                      Apply
+                    </button>
+                  </div>
+                ) : (
+                  <div className="flex items-center justify-between p-2 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-xs">
+                    <div className="flex items-center gap-1.5 text-emerald-800 dark:text-emerald-300 font-semibold">
+                      <Check className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+                      <span>Code <strong>{appliedPromo}</strong> active &bull; Total is ₹1</span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={handleRemovePromo}
+                      className="text-[11px] text-red-600 dark:text-red-400 hover:underline font-medium ml-2"
+                    >
+                      Remove
+                    </button>
+                  </div>
+                )}
+
+                {promoMessage && !appliedPromo && (
+                  <p className={`text-[11px] ${promoMessage.type === 'error' ? 'text-red-500' : 'text-emerald-600'}`}>
+                    {promoMessage.text}
+                  </p>
+                )}
               </div>
 
               {/* Form fields */}
@@ -388,7 +508,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose })
                     </span>
                   ) : (
                     <span className="flex items-center gap-1.5">
-                      <span>Proceed to Pay ₹{COURSE_INFO.price}</span>
+                      <span>Proceed to Pay ₹{currentPrice}</span>
                       <ArrowRight className="w-4 h-4" />
                     </span>
                   )}
